@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Simple Page</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<header class="clock-container">
+		<div class="clock-item">
+			<span class="label">HKT</span>
+			<div id="hkt-clock" class="clock">00:00:00</div>
+		</div>
+		<div class="clock-item">
+			<span class="label">UTC</span>
+			<div id="utc-clock" class="clock">00:00:00</div>
+		</div>
+	</header>
+    
+    <main>
+		<section class="metar-section">
+			<h2>VHHH METAR History (From 00:00 UTC Today)</h2>
+			<div class="table-container">
+				<table id="metar-table">
+					<thead>
+						<tr>
+							<th>Time (UTC)</th>
+							<th>Raw METAR</th>
+						</tr>
+					</thead>
+					<tbody id="metar-body">
+						<tr>
+							<td colspan="2" style="text-align: center;">Fetching latest weather data...</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

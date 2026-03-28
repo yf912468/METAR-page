@@ -1,0 +1,54 @@
+body {
+    /* Background color set to (163, 163, 163) */
+    background-color: rgb(163, 163, 163);
+    
+    /* Font color set to (49, 58, 183) */
+    color: rgb(49, 58, 183);
+    
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.clock-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 60px;
+    margin-bottom: 30px;
+    
+    /* Using a slightly transparent version of your background 
+       or a border to keep the "bar" visible against the new grey */
+    border: 2px solid rgb(49, 58, 183); 
+    padding: 15px 30px;
+    border-radius: 12px;
+    width: fit-content;
+}
+.clock-item {
+    text-align: center;
+}
+
+/* Ensure the clock text and labels also use your new blue color */
+.clock, .label, h1 {
+    color: rgb(49, 58, 183);
+}
+
+.label {
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #bdc3c7;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.clock {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.8rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
