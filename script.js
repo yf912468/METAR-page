@@ -1,31 +1,29 @@
 async function fetchVHHHMETAR() {
     const tableBody = document.getElementById('metar-body');
     
+    // 1. Calculate hours needed (Today's data since 00Z)
     const now = new Date();
     const startOfToday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
     const hoursSinceMidnight = Math.ceil((now - startOfToday) / (1000 * 60 * 60)) || 1;
 
-    // 1. The Target URL
-    const targetUrl = `https://aviationweather.gov/api/data/metar?ids=VHHH&format=json&hours=${hoursSinceMidnight}`;
+    // 2. Build the Aviation Weather URL
+    const targetUrl = `https://aviationweather.gov/api/data/metar?ids=VHHH&format=json&hours=${hoursSinceMidnight}&_=${now.getTime()}`;
     
-    // 2. Wrap it in the AllOrigins Proxy URL
-    const url = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+    // 3. Use CorsProxy.io (Prepend the proxy URL)
+    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
 
     try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('Proxy connection failed');
+        const response = await fetch(proxyUrl);
+        if (!response.ok) throw new Error('Proxy failed');
         
-        const wrapper = await response.json();
-        
-        // 3. IMPORTANT: AllOrigins returns the data as a STRING inside 'contents'
-        // We must parse that string into JSON manually.
-        const data = JSON.parse(wrapper.contents); 
+        const data = await response.json();
 
         if (!data || data.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="2">No data available for today yet.</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="2">No METARs found for today.</td></tr>';
             return;
         }
 
+        // 4. Sort and Display
         tableBody.innerHTML = '';
         data.sort((a, b) => new Date(b.reportTime) - new Date(a.reportTime));
 
@@ -35,20 +33,21 @@ async function fetchVHHHMETAR() {
             const rawText = report.rawOb;
 
             row.innerHTML = `
-                <td>${timePart}</td>
-                <td style="font-family: 'Courier New', monospace;">${rawText}</td>
+                <td style="font-weight: bold; color: #313ab7;">${timePart}</td>
+                <td style="font-family: 'Courier New', monospace; letter-spacing: 0.5px;">${rawText}</td>
             `;
             
-            if (/(TS|SHRA|FG|DZ|VCTS)/.test(rawText)) {
-                row.style.backgroundColor = 'rgba(49, 58, 183, 0.15)';
-                row.style.fontWeight = 'bold';
+            // Highlight VHHH-specific weather (Thunderstorms, Heavy Rain, Fog)
+            if (/(TS|SHRA|FG|DZ|VCTS|TYPH|RA)/.test(rawText)) {
+                row.style.backgroundColor = 'rgba(49, 58, 183, 0.12)';
+                row.style.borderLeft = '4px solid #313ab7';
             }
             tableBody.appendChild(row);
         });
 
     } catch (error) {
-        console.error('METAR Fetch Error:', error);
-        tableBody.innerHTML = '<tr><td colspan="2">Error bypassing CORS. Try refreshing.</td></tr>';
+        console.error('Fetch Error:', error);
+        tableBody.innerHTML = '<tr><td colspan="2" style="color: red;">Network Error: Try refreshing the page.</td></tr>';
     }
 }
 
