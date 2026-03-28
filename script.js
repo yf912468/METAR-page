@@ -1,30 +1,34 @@
 async function fetchVHHHMETAR() {
     const tableBody = document.getElementById('metar-body');
     
-    // 1. Calculate hours since 00:00 UTC
     const now = new Date();
     const startOfToday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
     const hoursSinceMidnight = Math.ceil((now - startOfToday) / (1000 * 60 * 60)) || 1;
 
-    // 2. Direct AWC API (Works on GitHub Pages because it's HTTPS)
-    const url = `https://aviationweather.gov/api/data/metar?ids=VHHH&format=json&hours=${hoursSinceMidnight}`;
+    // 1. The Target URL
+    const targetUrl = `https://aviationweather.gov/api/data/metar?ids=VHHH&format=json&hours=${hoursSinceMidnight}`;
+    
+    // 2. Wrap it in the AllOrigins Proxy URL
+    const url = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
 
     try {
         const response = await fetch(url);
-        if (!response.ok) throw new Error('Network response was not ok');
+        if (!response.ok) throw new Error('Proxy connection failed');
         
-        const data = await response.json();
+        const wrapper = await response.json();
+        
+        // 3. IMPORTANT: AllOrigins returns the data as a STRING inside 'contents'
+        // We must parse that string into JSON manually.
+        const data = JSON.parse(wrapper.contents); 
 
         if (!data || data.length === 0) {
             tableBody.innerHTML = '<tr><td colspan="2">No data available for today yet.</td></tr>';
             return;
         }
 
-        // 3. Clear and Sort (Latest first)
         tableBody.innerHTML = '';
         data.sort((a, b) => new Date(b.reportTime) - new Date(a.reportTime));
 
-        // 4. Populate Table
         data.forEach(report => {
             const row = document.createElement('tr');
             const timePart = report.reportTime ? report.reportTime.split(' ')[1].substring(0, 5) : "??:??";
@@ -35,18 +39,16 @@ async function fetchVHHHMETAR() {
                 <td style="font-family: 'Courier New', monospace;">${rawText}</td>
             `;
             
-            // Highlight significant weather for VHHH (TS, SHRA, FG, DZ)
             if (/(TS|SHRA|FG|DZ|VCTS)/.test(rawText)) {
                 row.style.backgroundColor = 'rgba(49, 58, 183, 0.15)';
                 row.style.fontWeight = 'bold';
             }
-
             tableBody.appendChild(row);
         });
 
     } catch (error) {
         console.error('METAR Fetch Error:', error);
-        tableBody.innerHTML = '<tr><td colspan="2">Error loading data. Check internet connection.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="2">Error bypassing CORS. Try refreshing.</td></tr>';
     }
 }
 
