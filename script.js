@@ -1,4 +1,4 @@
-aasync function fetchVHHHMETAR() {
+async function fetchVHHHMETAR() {
     const tableBody = document.getElementById('metar-body');
     
     // 1. Calculate hours since 00:00 UTC
